@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script
+        src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <style>
+        .active-number{
+            background-color :turquoise;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container mb-5">
+        <button id="btn-signout" onclick=signout() type="button" class="mb-5 btn btn-secondary">Sign-out</button>
+        <div class="row" id="content">
+            
+        </div>
+    </div>  
+    <div class="d-flex justify-content-center">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <!-- <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                
+                <li class="page-item"><a class="page-link" href="#">Next</a></li> -->
+            </ul>
+        </nav>
+    </div>
+</body>
+<script>
+    getData();
+    pageFunction(1);
+    function signout(){
+        window.location.href = "/login";
+    }
+    function getData(){
+        $.ajax({
+        url : '/user',
+        type : 'GET'
+        }).then(data=>{
+            $('#content').empty();
+                for(let x of data){
+                    let template = `
+                <div class="card col-3" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">User infomation</h5>
+                        <p class="card-text">Email : 
+                            <span class="text-${x._id}">${x.email}</span>
+                            <input type="text" id="input-email-${x._id}" class="input-${x._id}" style="display:none" value="${x.email}" />
+                            
+                        </p>
+                        <p class="card-text">Username : 
+                            <span class="text-${x._id}">${x.username}</span>
+                            <input type="text" id="input-username-${x._id}" class="input-${x._id}" value=${x.username} style="display:none"/>
+                        </p>
+                        <p class="card-text">Password : 
+                            <span class="text-${x._id}">${x.password}</span>
+                            <input type="text" id="input-password-${x._id}" class="input-${x._id}" value=${x.password} style="display:none"/>
+                        </p>
+                        <button id="btn-edit-${x._id}" onClick=editData("${x._id}") type="button" class="btn btn-info">Edit</button>
+                        <button id="btn-save-${x._id}" onClick=saveData("${x._id}") type="button" style="display:none" class="btn btn-success">Save</button>
+                        <button onClick=deleteData("${x._id}") type="button" class="btn btn-warning">Delete</button>
+                        <button onClick=detailData("${x._id}") type="button" class="btn btn-dark">Detail</button>
+                    </div>
+                </div>      
+                `;
+                $('#content').append(template);         
+            }
+                $('.pagination').empty();
+                let totalPage = Math.ceil(data.length/4)
+                for(let i = 1;i<=totalPage;i++){
+                    let templateX = `
+                            <li class="page-item" onClick=pageFunction(${i})><a id="page-${i}" class="page-link">${i}</a></li>
+                       `
+                       $('.pagination').append(templateX);
+                } 
+            })
+    }
+    function getDataById(id){
+        $.ajax({
+        url : '/user/'+id,
+        type : 'GET'
+        }).then(data=>{
+            for(let x of data){
+                let template = `
+                    <div class="card col-3" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title text-center">User infomation</h5>
+                            <p class="card-text">Email : 
+                                <span class="text-${x._id}">${x.email}</span>
+                            </p>
+                            <p class="card-text">Username : 
+                                <span class="text-${x._id}">${x.username}</span>
+                            </p>
+                            <p class="card-text">Password : 
+                                <span class="text-${x._id}">${x.password}</span>
+                            </p>
+                            <p class="card-text">Phone : 
+                                <span class="text-${x._id}">${x.phone}</span>
+                            </p>
+                            <p class="card-text">School : 
+                                <span class="text-${x._id}">${x.school}</span>
+                            </p>
+                            <button onClick=pageFunction(1) type="button" class="btn btn-dark">Back</button>
+                        </div>
+                    </div>      
+                `;
+                $('#content').append(template);
+            }
+        })
+    }
+    function editData(id){
+        $(".text-"+id).css("display","none");
+        $(".input-"+id).css("display","inline-block");
+        $("#btn-edit-"+id).css("display","none");
+        $("#btn-save-"+id).css("display","inline-block");
+    }
+    function saveData(id){
+        $(".text-"+id).css("display","inline-block");
+        $(".input-"+id).css("display","none");
+        $("#btn-edit-"+id).css("display","inline-block");
+        $("#btn-save-"+id).css("display","none");
+        $.ajax({
+            url: "/user/"+id,
+            type: "PUT",
+            data : {
+                email : $("#input-email-"+id).val(),
+                username : $("#input-username-"+id).val(),
+                password : $("#input-password-"+id).val()
+            }
+        })
+        .then(data=>{
+            getData();
+            pageFunction(1);
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+    }
+    function deleteData(id){
+        $.ajax({
+            url: "/user/"+id,
+            type: "DELETE"
+        })
+        .then(data=>{
+            getData();
+            pageFunction(1);
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+    }
+    function detailData(id){
+        $('#content').empty();
+        getDataById(id);
+    }
+
+    function pageFunction(number){
+        $.ajax({
+            url: "/user/page/"+number,
+            type: 'GET'
+        })
+        .then(data=>{
+            $('#content').empty();
+                for(let x of data){
+                    let template = `
+                <div class="card col-3" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">User infomation</h5>
+                        <p class="card-text">Email : 
+                            <span class="text-${x._id}">${x.email}</span>
+                            <input type="text" id="input-email-${x._id}" class="input-${x._id}" value=${x.email} style="display:none"/>
+                        </p>
+                        <p class="card-text">Username : 
+                            <span class="text-${x._id}">${x.username}</span>
+                            <input type="text" id="input-username-${x._id}" class="input-${x._id}" value=${x.username} style="display:none"/>
+                        </p>
+                        <p class="card-text">Password : 
+                            <span class="text-${x._id}">${x.password}</span>
+                            <input type="text" id="input-password-${x._id}" class="input-${x._id}" value=${x.password} style="display:none"/>
+                        </p>
+                        <button id="btn-edit-${x._id}" onClick=editData("${x._id}") type="button" class="btn btn-info">Edit</button>
+                        <button id="btn-save-${x._id}" onClick=saveData("${x._id}") type="button" style="display:none" class="btn btn-success">Save</button>
+                        <button onClick=deleteData("${x._id}") type="button" class="btn btn-warning">Delete</button>
+                        <button onClick=detailData("${x._id}") type="button" class="btn btn-dark">Detail</button>
+                    </div>
+                </div>      
+                `;
+                $('#content').append(template);
+                $(".page-link").removeClass('active-number');
+                $("#page-"+number).addClass('active-number');
+            }
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+    }
+</script>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script
+        src="https://code.jquery.com/jquery-3.5.1.js"
+        integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+        crossorigin="anonymous">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row" id="content">
+
+        </div>
+    </div>
+</body>
+<script>
+
+    getData();    
+
+    function getData(){
+        $.ajax({
+        url : '/user',
+        type : 'GET'
+        }).then(data=>{
+                for(let x of data){
+                    var template = `
+                <div class="card col-4" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">User infomation</h5>
+                        <p class="card-text">Email : 
+                            <span class="text-${x._id}">${x.email}</span>
+                        </p>
+                        <p class="card-text">Username : 
+                            <span class="text-${x._id}">${x.username}</span>
+                        </p>
+                        <p class="card-text">Password : 
+                            <span class="text-${x._id}">${x.password}</span>
+                        </p>
+                        <p class="card-text">Phone : 
+                            <span class="text-${x._id}">${x.phone}</span>
+                        </p>
+                        <p class="card-text">School : 
+                            <span class="text-${x._id}">${x.school}</span>
+                        </p>
+                    </div>
+                </div>      
+                `;
+                $('#content').append(template);
+            }
+        })
+    }
+
+    function editData(id){
+        $(".text-"+id).css("display","none");
+        $(".input-"+id).css("display","inline-block");
+        $("#btn-edit-"+id).css("display","none");
+        $("#btn-save-"+id).css("display","inline-block");
+    }
+    function saveData(id){
+        $(".text-"+id).css("display","inline-block");
+        $(".input-"+id).css("display","none");
+        $("#btn-edit-"+id).css("display","inline-block");
+        $("#btn-save-"+id).css("display","none");
+        $.ajax({
+            url: "/user/"+id,
+            type: "PUT",
+            data : {
+                email : $("#input-email-"+id).val(),
+                username : $("#input-username-"+id).val(),
+                password : $("#input-password-"+id).val()
+            }
+        })
+        .then(data=>{
+            $('#content').empty();
+            getData();
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+    }
+    function deleteData(id){
+        $.ajax({
+            url: "/user/"+id,
+            type: "DELETE"
+        })
+        .then(data=>{
+            $('#content').empty();
+            getData();
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+    }
+</script>
+
+</html>
